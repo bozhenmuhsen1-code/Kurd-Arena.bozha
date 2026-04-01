@@ -1,65 +1,38 @@
-body {
-    margin: 0;
-    padding: 0;
-    background-color: #000;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: #fff;
-}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-.login-box {
-    background: #111;
-    padding: 40px;
-    border-radius: 15px;
-    border: 2px solid #d4af37;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-    text-align: center;
-    width: 320px;
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyA1Q7sgx9B155mCyzpIlHV8OUGVPriUNVo",
+  authDomain: "kurd-arena.firebaseapp.com",
+  projectId: "kurd-arena",
+  storageBucket: "kurd-arena.firebasestorage.app",
+  messagingSenderId: "462287271115",
+  appId: "1:462287271115:web:4a8911c2acf7a513ee974e"
+};
 
-.logo {
-    color: #d4af37;
-    margin-bottom: 20px;
-    font-size: 28px;
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-.logo span {
-    color: #fff;
-}
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const message = document.getElementById('message');
 
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    background: #222;
-    border: 1px solid #444;
-    border-radius: 5px;
-    color: #fff;
-    box-sizing: border-box;
-    text-align: right;
-}
-
-input:focus {
-    border-color: #d4af37;
-    outline: none;
-}
-
-.gold-btn {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(45deg, #d4af37, #f9d976);
-    border: none;
-    border-radius: 5px;
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-#message {
-    margin-top: 15px;
-    font-size: 14px;
-}
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+            username: username,
+            email: email,
+            createdAt: new Date()
+        });
+        message.style.color = "#d4af37";
+        message.innerText = "هەژمارەکە بە سەرکەوتوویی دروستکرا!";
+    } catch (error) {
+        message.style.color = "red";
+        message.innerText = "هەڵە: " + error.message;
+    }
+});
